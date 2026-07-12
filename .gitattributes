@@ -1,0 +1,3 @@
+# Keep shell scripts runnable on Linux CI (no CRLF / BOM)
+mvnw text eol=lf
+*.sh text eol=lf

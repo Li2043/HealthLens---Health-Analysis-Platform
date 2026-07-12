@@ -60,6 +60,8 @@ AI** 分析模式，以及 Docker Compose 一键本地全栈运行。
 | **双语提取** | 中英文心率/血压（如 `heart rate 200` 与 `心率200`） |
 | **Docker Compose** | 一条命令启动全栈；前端源码挂载便于开发热更新 |
 
+![顶部滑块 — 语言与分析模式](./docs/images/09-header-toggles.png)
+
 ---
 
 ## 平台能评估哪些方面
@@ -76,6 +78,8 @@ AI** 分析模式，以及 Docker Compose 一键本地全栈运行。
 | **自由症状描述** | 「胸口发闷」「浑身不舒服」 | **AI 模式**下 OpenAI 理解更好；Mock 依赖规则/关键词 |
 
 **暂不支持：** 血糖、体温、血氧、化验、影像、用药分析或经临床验证的协议。
+
+![紧急升级 — 胸痛与呼吸困难](./docs/images/05-analysis-emergency.png)
 
 ---
 
@@ -99,74 +103,11 @@ OPENAI_API_KEY=sk-...
 docker compose up -d --build ai-service
 ```
 
----
+![分析页 — 已选择 AI 模式](./docs/images/04-analysis-input.png)
 
-## 截图与功能演示
+![从 AI 切换到 Mock 时的确认框](./docs/images/10-mock-mode-confirm.png)
 
-> 请将图片放入 [`docs/images/`](./docs/images/) 目录。文件名与拍摄说明见
-> [`docs/images/README.md`](./docs/images/README.md)。
-
-### 系统架构
-
-![平台架构](./docs/images/01-architecture.png)
-
-> **📷 图片占位：** `docs/images/01-architecture.png` — 四服务架构图
->（React → Spring Boot → FastAPI → PostgreSQL）或带标注的架构示意图。
-
-### 登录与注册
-
-![登录页](./docs/images/02-login-en.png)
-
-> **📷 图片占位：** `docs/images/02-login-en.png` — 英文登录页；语言滑块仅在顶部工具栏。
-
-![注册页](./docs/images/03-register-zh.png)
-
-> **📷 图片占位：** `docs/images/03-register-zh.png` — 中文注册页（邮箱 / 密码 / 注册）。
-
-### 健康分析
-
-![分析输入](./docs/images/04-analysis-input.png)
-
-> **📷 图片占位：** `docs/images/04-analysis-input.png` — 分析页：顶部 **AI** 模式、
-> 模式说明、健康描述输入、「使用示例」与「开始分析」。
-
-![紧急升级](./docs/images/05-analysis-emergency.png)
-
-> **📷 图片占位：** `docs/images/05-analysis-emergency.png` — 紧急场景（胸痛、呼吸困难）：
->「疑似紧急情况」、分诊**紧急**、Provider / 模式标签。
-
-![分析结果](./docs/images/06-analysis-result.png)
-
-> **📷 图片占位：** `docs/images/06-analysis-result.png` — 结果面板：分诊、体征风险、
->「情况说明」、检测信号、安全校验**通过**。
-
-### 历史记录
-
-![分析历史](./docs/images/07-history.png)
-
-> **📷 图片占位：** `docs/images/07-history.png` — 历史列表：风险标签、时间、摘要、
->「清空历史」按钮。
-
-![分析详情](./docs/images/08-detail.png)
-
-> **📷 图片占位：** `docs/images/08-detail.png` — 详情页：原始描述与完整分析结果。
-
-### 顶部滑块（语言 + 分析模式）
-
-![顶部滑块](./docs/images/09-header-toggles.png)
-
-> **📷 图片占位：** `docs/images/09-header-toggles.png` — 登录后顶部：**English / 中文**
-> 与 **AI / Mock** 胶囊滑块（淡青底色、深青滑块、选中白字）。
-
-![Mock 模式确认框](./docs/images/10-mock-mode-confirm.png)
-
-> **📷 图片占位：** `docs/images/10-mock-mode-confirm.png` — 从 AI 切到 Mock 时的确认框：
-> 提示仅供测试/离线；「继续使用 AI」/「切换到 Mock」。
-
-![中文高风险结果](./docs/images/11-analysis-high-risk-zh.png)
-
-> **📷 图片占位：** `docs/images/11-analysis-high-risk-zh.png` — 中文界面高风险案例：
-> 说明含 **120**、急救步骤、Provider 为 `openai` 或 `mock`。
+![中文界面高风险分析结果](./docs/images/11-analysis-high-risk-zh.png)
 
 ---
 
@@ -200,6 +141,8 @@ FastAPI AI 服务
 （`ai-service/app/escalation.py`）捕获。详见
 [`ai-service/docs/TRIAGE_POLICY.md`](./ai-service/docs/TRIAGE_POLICY.md)。
 
+![分析结果 — 分诊、情况说明与安全校验](./docs/images/06-analysis-result.png)
+
 ---
 
 ## 架构
@@ -218,6 +161,8 @@ FastAPI AI 服务（:8000）
         v
 PostgreSQL（:5432）  用户 + 分析历史（Flyway 迁移）
 ```
+
+![平台架构](./docs/images/01-architecture.png)
 
 | 层 | 技术 | 状态 |
 | --- | --- | --- |
@@ -276,10 +221,19 @@ docker compose up -d --build
 ### 典型使用流程
 
 1. 在 `/register` 或 `/login` **注册**或**登录**
+
+![登录页（英文）](./docs/images/02-login-en.png)
+
+![注册页（中文）](./docs/images/03-register-zh.png)
+
 2. 顶部切换 **English / 中文**；保持 **AI** 模式（或切到 Mock — 需确认对话框）
 3. 进入**分析**页，输入健康描述（或使用示例文本）
 4. 查看分诊、体征风险、「情况说明」、Provider 标签与安全校验
 5. 在**历史**页浏览记录、查看详情或**清空历史**
+
+![分析历史](./docs/images/07-history.png)
+
+![分析详情](./docs/images/08-detail.png)
 
 单独启动各服务：[`docs/development.md`](./docs/development.md)。
 

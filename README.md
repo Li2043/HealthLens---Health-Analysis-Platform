@@ -66,6 +66,8 @@ and Docker Compose for local full-stack runs.
 | **Bilingual extraction** | English and Chinese heart rate / blood pressure patterns (e.g. `heart rate 200` and `心率200`) |
 | **Docker Compose** | One command to run frontend, backend, AI service, and Postgres; frontend source volume for dev |
 
+![Header toggles — language and analysis mode](./docs/images/09-header-toggles.png)
+
 ---
 
 ## What the platform can assess
@@ -84,6 +86,8 @@ and Docker Compose for local full-stack runs.
 
 **Not supported today:** blood glucose, temperature, SpO₂, labs, imaging, medications, or
 validated clinical protocols.
+
+![Emergency escalation — chest pain and shortness of breath](./docs/images/05-analysis-emergency.png)
 
 ---
 
@@ -107,79 +111,11 @@ OPENAI_API_KEY=sk-...
 docker compose up -d --build ai-service
 ```
 
----
+![Analysis page — AI mode selected](./docs/images/04-analysis-input.png)
 
-## Screenshots & Demo Walkthrough
+![Mock mode confirmation when switching from AI](./docs/images/10-mock-mode-confirm.png)
 
-> Add images under [`docs/images/`](./docs/images/). See
-> [`docs/images/README.md`](./docs/images/README.md) for filenames and capture notes.
-
-### Architecture
-
-![Platform architecture](./docs/images/01-architecture.png)
-
-> **📷 Image placeholder:** `docs/images/01-architecture.png` — Four-service stack
-> (React → Spring Boot → FastAPI → PostgreSQL) or an annotated architecture diagram.
-
-### Login & Register
-
-![Login page](./docs/images/02-login-en.png)
-
-> **📷 Image placeholder:** `docs/images/02-login-en.png` — Login page in English; language
-> toggle only in the header toolbar.
-
-![Register page](./docs/images/03-register-zh.png)
-
-> **📷 Image placeholder:** `docs/images/03-register-zh.png` — Register page in Chinese
-> (邮箱 / 密码 / 注册).
-
-### Health Analysis
-
-![Analysis input](./docs/images/04-analysis-input.png)
-
-> **📷 Image placeholder:** `docs/images/04-analysis-input.png` — Analysis page with **AI**
-> mode selected in header, mode hint, health note textarea, **Use sample**, and **Analyse**.
-
-![Emergency escalation](./docs/images/05-analysis-emergency.png)
-
-> **📷 Image placeholder:** `docs/images/05-analysis-emergency.png` — Emergency input
-> (e.g. chest pain + shortness of breath): **Possible emergency**, **Triage: Emergency**,
-> Provider / mode badges.
-
-![Analysis result](./docs/images/06-analysis-result.png)
-
-> **📷 Image placeholder:** `docs/images/06-analysis-result.png` — Result panel: triage,
-> vitals risk, **What this may mean**, detected signals, safety check **Passed**.
-
-### History
-
-![Analysis history](./docs/images/07-history.png)
-
-> **📷 Image placeholder:** `docs/images/07-history.png` — History list with risk badges,
-> timestamps, snippets, and **Clear history**.
-
-![Analysis detail](./docs/images/08-detail.png)
-
-> **📷 Image placeholder:** `docs/images/08-detail.png` — Detail page with original note
-> and full analysis result.
-
-### Header toggles (language + analysis mode)
-
-![Header toggles](./docs/images/09-header-toggles.png)
-
-> **📷 Image placeholder:** `docs/images/09-header-toggles.png` — Logged-in header:
-> **English / 中文** and **AI / Mock** pill toggles (light cyan track, dark teal thumb,
-> white text on active side).
-
-![Mock mode confirmation](./docs/images/10-mock-mode-confirm.png)
-
-> **📷 Image placeholder:** `docs/images/10-mock-mode-confirm.png` — Dialog when switching
-> AI → Mock: warns Mock is for testing/offline use; **Stay on AI** / **Switch to Mock**.
-
-![High risk Chinese result](./docs/images/11-analysis-high-risk-zh.png)
-
-> **📷 Image placeholder:** `docs/images/11-analysis-high-risk-zh.png` — Chinese UI,
-> high-risk case: explanation includes **120**, emergency steps, Provider `openai` or `mock`.
+![High-risk result in Chinese UI](./docs/images/11-analysis-high-risk-zh.png)
 
 ---
 
@@ -214,6 +150,8 @@ Symptom-only emergencies are caught by the **escalation detector**
 (`ai-service/app/escalation.py`), which can override low vitals-based risk. See
 [`ai-service/docs/TRIAGE_POLICY.md`](./ai-service/docs/TRIAGE_POLICY.md).
 
+![Analysis result — triage, explanation, and safety check](./docs/images/06-analysis-result.png)
+
 ---
 
 ## Architecture
@@ -232,6 +170,8 @@ FastAPI AI Service (:8000)
         v
 PostgreSQL (:5432)   users + analysis history (Flyway migrations)
 ```
+
+![Platform architecture](./docs/images/01-architecture.png)
 
 | Layer | Technology | Status |
 | --- | --- | --- |
@@ -291,10 +231,19 @@ mounts `./frontend` into the container for live updates.
 ### Typical user flow
 
 1. **Register** or **Login** at `/register` or `/login`
+
+![Login page (English)](./docs/images/02-login-en.png)
+
+![Register page (中文)](./docs/images/03-register-zh.png)
+
 2. In the header: toggle **English / 中文**; keep **AI** mode (or switch to Mock — confirm dialog)
 3. Go to **Analyse**, enter a health note (or use sample text)
 4. Review triage, vitals risk, **What this may mean**, provider badge, and safety check
 5. Open **History** to browse saved results, view details, or **Clear history**
+
+![Analysis history](./docs/images/07-history.png)
+
+![Analysis detail](./docs/images/08-detail.png)
 
 Individual service setup: [`docs/development.md`](./docs/development.md).
 
