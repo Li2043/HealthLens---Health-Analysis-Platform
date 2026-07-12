@@ -1,0 +1,97 @@
+import { isAxiosError } from "axios";
+import { useState } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { useUiLanguage } from "../i18n/UiLanguageContext";
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+  return fallback;
+}
+
+export function LoginPage() {
+  const { login, isAuthenticated } = useAuth();
+  const { ui } = useUiLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = (location.state as { from?: string } | null)?.from ?? "/analyse";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  if (isAuthenticated) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await login(email.trim(), password);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getErrorMessage(err, ui.login.failed));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="auth-page">
+      <h1>{ui.login.title}</h1>
+      <p className="page-intro">{ui.login.intro}</p>
+
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label className="field-label" htmlFor="login-email">
+          {ui.login.email}
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          autoComplete="email"
+          required
+          disabled={loading}
+        />
+
+        <label className="field-label" htmlFor="login-password">
+          {ui.login.password}
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
+          required
+          disabled={loading}
+        />
+
+        <button type="submit" disabled={loading}>
+          {loading ? ui.login.submitting : ui.login.submit}
+        </button>
+      </form>
+
+      {error && (
+        <p className="error-banner" role="alert">
+          {error}
+        </p>
+      )}
+
+      <p>
+        {ui.login.needAccount}{" "}
+        <Link to="/register">{ui.login.registerLink}</Link>
+      </p>
+    </section>
+  );
+}

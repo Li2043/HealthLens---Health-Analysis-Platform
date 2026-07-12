@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthLens-LLM</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header class="hero">
+        <div class="header-top">
+          <div class="hero-text">
+            <p class="eyebrow" data-i18n="eyebrow">Safe AI Consultation Demo</p>
+            <h1 data-i18n="title">HealthLens</h1>
+            <p class="subtitle" data-i18n="subtitle">
+              A safe AI healthcare consultation workflow
+            </p>
+            <p class="hero-description" data-i18n="heroDescription">
+              HealthLens explores how an LLM can support safer healthcare consultations through a structured workflow: symptom signal extraction, risk assessment, emergency escalation, and safety-validated explanation.
+            </p>
+          </div>
+          <button
+            type="button"
+            id="lang-toggle"
+            class="lang-toggle"
+            aria-label="Switch language"
+            aria-pressed="false"
+          >
+            <span class="lang-toggle-indicator"></span>
+            <span class="lang-toggle-option" data-lang="en">EN</span>
+            <span class="lang-toggle-option" data-lang="zh">中文</span>
+          </button>
+        </div>
+        <p class="notice" data-i18n="notice">
+          This tool is a software demonstration only. It is not medical advice, diagnosis, or treatment guidance. If symptoms are severe, urgent, or worsening, seek professional medical help.
+        </p>
+
+        <nav class="app-tabs" aria-label="Main navigation">
+          <button type="button" class="app-tab is-active" data-tab="analyse" data-i18n="tabAnalyse">Analyse</button>
+          <button type="button" class="app-tab" data-tab="evaluation" data-i18n="tabEvaluation">Evaluation Lab</button>
+        </nav>
+      </header>
+
+      <div id="panel-analyse" class="app-panel">
+      <section class="product-overview card">
+        <p class="section-eyebrow" data-i18n="overviewEyebrow">Product overview</p>
+        <h2 class="section-title" data-i18n="overviewTitle">What HealthLens does</h2>
+        <p class="overview-lead" data-i18n="overviewBody">
+          HealthLens turns a short, free-text health note into a structured, safety-managed consultation. Instead of a single chatbot reply, it runs a designed workflow that extracts signals, assesses risk, decides whether to escalate, and generates a calm, non-diagnostic explanation — with safety checks at every step.
+        </p>
+        <ul class="overview-points">
+          <li><strong data-i18n="overviewPoint1Title">Structured, not a chatbot.</strong> <span data-i18n="overviewPoint1Body">The LLM is one constrained component inside a transparent workflow.</span></li>
+          <li><strong data-i18n="overviewPoint2Title">Safety-first.</strong> <span data-i18n="overviewPoint2Body">No diagnosis, no medication advice, always a clear next step.</span></li>
+          <li><strong data-i18n="overviewPoint3Title">Risk-aware.</strong> <span data-i18n="overviewPoint3Body">Behaviour changes across four triage tiers, with decisive emergency escalation.</span></li>
+        </ul>
+      </section>
+
+      <section class="workflow-viz card">
+        <p class="section-eyebrow" data-i18n="workflowEyebrow">Consultation workflow</p>
+        <h2 class="section-title" data-i18n="workflowTitle">How a consultation flows</h2>
+        <ol class="workflow-steps">
+          <li class="workflow-step"><span class="workflow-index">1</span><span class="workflow-label" data-i18n="wfInput">User input</span></li>
+          <li class="workflow-step"><span class="workflow-index">2</span><span class="workflow-label" data-i18n="wfExtract">Signal extraction</span></li>
+          <li class="workflow-step"><span class="workflow-index">3</span><span class="workflow-label" data-i18n="wfRisk">Risk assessment</span></li>
+          <li class="workflow-step"><span class="workflow-index">4</span><span class="workflow-label" data-i18n="wfSafety">Safety validation</span></li>
+          <li class="workflow-step"><span class="workflow-index">5</span><span class="workflow-label" data-i18n="wfExplain">Explanation</span></li>
+          <li class="workflow-step"><span class="workflow-index">6</span><span class="workflow-label" data-i18n="wfEscalate">Escalation</span></li>
+          <li class="workflow-step"><span class="workflow-index">7</span><span class="workflow-label" data-i18n="wfResponse">Final response</span></li>
+        </ol>
+      </section>
+
+      <section class="risk-tiers card">
+        <p class="section-eyebrow" data-i18n="tiersEyebrow">Risk communication</p>
+        <h2 class="section-title" data-i18n="tiersTitle">How risk is communicated</h2>
+        <div class="tier-grid">
+          <article class="tier-card tier-low">
+            <span class="tier-dot"></span>
+            <h3 data-i18n="tierLowTitle">Low</h3>
+            <p data-i18n="tierLowBody">Calm, honest reassurance. Self-monitor and seek advice if it persists.</p>
+          </article>
+          <article class="tier-card tier-moderate">
+            <span class="tier-dot"></span>
+            <h3 data-i18n="tierModerateTitle">Moderate</h3>
+            <p data-i18n="tierModerateBody">Names the contributing signals. Consider contacting a professional.</p>
+          </article>
+          <article class="tier-card tier-high">
+            <span class="tier-dot"></span>
+            <h3 data-i18n="tierHighTitle">High</h3>
+            <p data-i18n="tierHighBody">Serious and direct. Recommends prompt professional care.</p>
+          </article>
+          <article class="tier-card tier-emergency">
+            <span class="tier-dot"></span>
+            <h3 data-i18n="tierEmergencyTitle">Emergency</h3>
+            <p data-i18n="tierEmergencyBody">Leads with urgent escalation. Overrides risk on red-flag symptoms.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="safety-strategy card">
+        <p class="section-eyebrow" data-i18n="safetyEyebrow">Safety strategy</p>
+        <h2 class="section-title" data-i18n="safetyTitle">Guardrails built into every response</h2>
+        <ul class="safety-layers">
+          <li><strong data-i18n="safetyL1Title">Scope & uncertainty.</strong> <span data-i18n="safetyL1Body">Detects health vs. non-health input and preserves uncertainty instead of guessing.</span></li>
+          <li><strong data-i18n="safetyL2Title">No diagnosis or dosing.</strong> <span data-i18n="safetyL2Body">A prompt + output validator block diagnostic claims and medication advice.</span></li>
+          <li><strong data-i18n="safetyL3Title">Risk-aware responses.</strong> <span data-i18n="safetyL3Body">Tone and next step change with the triage tier.</span></li>
+          <li><strong data-i18n="safetyL4Title">Emergency escalation.</strong> <span data-i18n="safetyL4Body">Red-flag symptoms trigger an unconditional "seek urgent care" message.</span></li>
+          <li><strong data-i18n="safetyL5Title">Human referral.</strong> <span data-i18n="safetyL5Body">High-risk and uncertain cases are steered toward a professional.</span></li>
+        </ul>
+      </section>
+
+      <section class="how-to card">
+        <h2 class="section-title" data-i18n="howToUse">How to use</h2>
+        <ol class="steps-grid">
+          <li class="step-card">
+            <span class="step-number">1</span>
+            <h3 data-i18n="step1Title">Enter a short health note</h3>
+            <p data-i18n="step1Body">Example: “My heart rate is 100 and I can’t sleep.”</p>
+          </li>
+          <li class="step-card">
+            <span class="step-number">2</span>
+            <h3 data-i18n="step2Title">Click Analyse</h3>
+            <p data-i18n="step2Body">The app extracts health-related signals and applies rule-based checks.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-number">3</span>
+            <h3 data-i18n="step3Title">Review the result</h3>
+            <p data-i18n="step3Body">See the risk summary, detected signals, evidence, and safety-conscious explanation.</p>
+          </li>
+        </ol>
+      </section>
+
+      <main>
+        <section class="input-card card">
+          <label for="health-input" class="input-label" data-i18n="inputLabel">Describe your health note</label>
+          <p class="input-helper" data-i18n="inputHelper">
+            Use short, plain language. Do not enter real personal medical information.
+          </p>
+
+          <div class="textarea-wrap">
+            <textarea
+              id="health-input"
+              rows="5"
+              data-i18n-placeholder="inputPlaceholder"
+              placeholder="Describe how you feel, your sleep, heart rate, or blood pressure in a few sentences."
+            ></textarea>
+            <button
+              id="voice-btn"
+              type="button"
+              class="btn btn-secondary voice-btn"
+              aria-label="Voice input"
+            >
+              <span class="voice-icon" aria-hidden="true">🎙</span>
+              <span id="voice-btn-text" data-i18n="voiceBtn">Voice input</span>
+            </button>
+          </div>
+
+          <p id="voice-unsupported" class="voice-note hidden" data-i18n="voiceUnsupported">
+            Voice input is not supported in this browser. Please type your text instead.
+          </p>
+          <p id="voice-status" class="voice-status hidden" aria-live="polite"></p>
+
+          <div class="sample-buttons">
+            <span class="sample-label" data-i18n="trySample">Try an example:</span>
+            <button type="button" class="sample-btn btn btn-ghost" data-sample="low" data-i18n="sampleLow">Mild symptoms</button>
+            <button type="button" class="sample-btn btn btn-ghost" data-sample="moderate" data-i18n="sampleModerate">Sleep and mood</button>
+            <button type="button" class="sample-btn btn btn-ghost" data-sample="high" data-i18n="sampleHigh">Higher-risk example</button>
+          </div>
+
+          <div class="action-row">
+            <button id="analyse-btn" type="button" class="btn btn-primary" data-i18n="analyseBtn">Analyse note</button>
+            <button id="clear-btn" type="button" class="btn btn-secondary" data-i18n="clearBtn">Clear</button>
+          </div>
+        </section>
+
+        <section id="empty-state" class="empty-state card">
+          <div class="empty-icon" aria-hidden="true">📋</div>
+          <h2 data-i18n="emptyTitle">Your analysis will appear here.</h2>
+          <p data-i18n="emptyBody">Try an example or enter your own note to begin.</p>
+        </section>
+
+        <section id="loading" class="loading-card card hidden" aria-live="polite">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <h2 data-i18n="loadingTitle">Analysing your note…</h2>
+          <p data-i18n="loadingBody">Extracting signals and generating a safe explanation.</p>
+        </section>
+
+        <section id="error" class="error-card card hidden" role="alert">
+          <h2 data-i18n="errorTitle">Analysis is temporarily unavailable.</h2>
+          <p id="error-message" data-i18n="errorBody">Please try again later.</p>
+        </section>
+
+        <section id="results" class="results hidden">
+          <aside id="escalation-banner" class="escalation-banner hidden" role="status">
+            <span id="escalation-tag" class="escalation-tag"></span>
+            <p id="escalation-action" class="escalation-action"></p>
+          </aside>
+
+          <article class="result-card summary-card">
+            <h2 data-i18n="resultSummary">Result summary</h2>
+            <div id="risk-level-badge" class="risk-badge"></div>
+            <p id="result-summary" class="result-summary-text"></p>
+            <p id="incomplete-warning" class="warning-banner hidden" data-i18n="incompleteWarning">
+              Some measurements were incomplete or ambiguous.
+            </p>
+          </article>
+
+          <article class="result-card">
+            <h2 data-i18n="detectedSignalsTitle">Detected signals</h2>
+            <ul id="signal-metrics" class="signal-metrics"></ul>
+            <div id="detected-signals-flags" class="signal-flags"></div>
+          </article>
+
+          <article class="result-card">
+            <h2 data-i18n="llmExplanation">Explanation</h2>
+            <p id="explanation" class="explanation-text"></p>
+          </article>
+
+          <article class="result-card">
+            <h2 data-i18n="extractionEvidence">Evidence</h2>
+            <ul id="extraction-evidence" class="evidence-list"></ul>
+          </article>
+
+          <article class="result-card safety-card">
+            <h2 data-i18n="safetyGuardrails">Safety guardrails</h2>
+            <p class="safety-lead" data-i18n="safetyGuardrailsText">
+              This response avoids diagnosis, medication instructions, and treatment advice.
+            </p>
+          </article>
+
+          <details class="result-card technical-details">
+            <summary data-i18n="technicalDetails">Technical details for reviewers</summary>
+            <div class="technical-section">
+              <h3 data-i18n="systemInfo">System information</h3>
+              <div id="provider-status" class="provider-status"></div>
+            </div>
+            <div class="technical-section">
+              <h3 data-i18n="safetyCheck">Safety validation</h3>
+              <ul id="safety-check-list" class="check-list"></ul>
+            </div>
+            <div class="technical-section">
+              <h3 data-i18n="ruleEngineNotes">Rule engine notes</h3>
+              <p id="rule-explanation" class="summary-text muted"></p>
+              <p id="extraction-note" class="summary-text muted hidden"></p>
+            </div>
+            <div class="technical-section">
+              <h3 data-i18n="structuredInput">Structured input</h3>
+              <pre id="structured-input"></pre>
+            </div>
+            <div class="technical-section">
+              <h3 data-i18n="riskResult">Risk result</h3>
+              <pre id="risk-result"></pre>
+            </div>
+          </details>
+        </section>
+      </main>
+      </div>
+
+      <div id="panel-evaluation" class="app-panel hidden">
+        <section class="eval-intro card">
+          <h2 class="section-title" data-i18n="evalTitle">Evaluation Lab</h2>
+          <p data-i18n="evalDescription">
+            Run a curated evaluation suite to test risk classification, signal extraction, safety guardrails, latency, and failure handling.
+          </p>
+          <p class="eval-note" data-i18n="evalMockNote">
+            Mock mode is free, deterministic, and recommended for regression testing.
+          </p>
+          <div class="action-row">
+            <button id="run-eval-btn" type="button" class="btn btn-primary" data-i18n="evalRunBtn">Run evaluation (mock)</button>
+            <button id="run-eval-openai-btn" type="button" class="btn btn-secondary" data-i18n="evalRunOpenaiBtn">Run evaluation (OpenAI)</button>
+          </div>
+          <p class="eval-openai-warning" data-i18n="evalOpenaiWarning">
+            OpenAI mode calls the live API for extraction and explanation. It may use tokens and can produce different results from mock mode.
+          </p>
+        </section>
+
+        <section id="eval-loading" class="loading-card card hidden" aria-live="polite">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <h2 id="eval-loading-title" data-i18n="evalLoadingTitle">Running evaluation suite…</h2>
+          <p id="eval-loading-body" data-i18n="evalLoadingBody">Executing curated cases against the mock provider workflow.</p>
+        </section>
+
+        <section id="eval-error" class="error-card card hidden" role="alert">
+          <h2 data-i18n="evalErrorTitle">Evaluation could not be completed.</h2>
+          <p id="eval-error-message"></p>
+        </section>
+
+        <section id="eval-results" class="hidden">
+          <p id="eval-provider-banner" class="eval-provider-banner hidden"></p>
+          <div id="eval-summary" class="metric-grid"></div>
+          <div class="result-card">
+            <h2 data-i18n="evalResultsTitle">Case results</h2>
+            <div class="table-wrap">
+              <table class="eval-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="evalColCase">Case</th>
+                    <th data-i18n="evalColCategory">Category</th>
+                    <th data-i18n="evalColExpected">Expected</th>
+                    <th data-i18n="evalColActual">Actual</th>
+                    <th data-i18n="evalColSignals">Signals</th>
+                    <th data-i18n="evalColSafety">Safety</th>
+                    <th data-i18n="evalColStatus">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="eval-results-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="eval-case-details" class="eval-details-list"></div>
+        </section>
+      </div>
+
+      </div>
+
+      <footer>
+        <p data-i18n="footer">Built as a software engineering portfolio demo — not a clinical product.</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/evaluation.js"></script>
+</body>
+</html>

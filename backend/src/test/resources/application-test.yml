@@ -1,0 +1,6 @@
+healthlens:
+  ai-service:
+    base-url: http://localhost:8000
+  jwt:
+    secret: local-dev-only-jwt-secret-32chars-min!!
+    expiration-ms: 3600000
