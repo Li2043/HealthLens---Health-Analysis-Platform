@@ -22,8 +22,8 @@ services:
       context: ./ai-service
     container_name: healthlens-ai-service
     environment:
-      EXTRACTOR_PROVIDER: ${EXTRACTOR_PROVIDER:-mock}
-      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      EXTRACTOR_PROVIDER: ${EXTRACTOR_PROVIDER:-deepseek}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}

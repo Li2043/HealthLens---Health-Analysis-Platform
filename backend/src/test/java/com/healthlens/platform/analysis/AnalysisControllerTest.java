@@ -8,6 +8,7 @@ import com.healthlens.platform.security.JwtAuthenticationFilter;
 import com.healthlens.platform.security.JwtService;
 import com.healthlens.platform.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -85,6 +88,36 @@ class AnalysisControllerTest {
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.riskLevel").value("moderate"))
                 .andExpect(jsonPath("$.result.risk_result.risk_level").value("moderate"));
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void analyseDefaultsModeToDeepSeekWhenOmitted() throws Exception {
+        ObjectNode result = objectMapper.createObjectNode();
+        result.putObject("risk_result").put("risk_level", "moderate");
+
+        UUID id = UUID.randomUUID();
+        ArgumentCaptor<AnalysisRequest> requestCaptor = ArgumentCaptor.forClass(AnalysisRequest.class);
+        when(analysisService.analyse(any(AnalysisRequest.class)))
+                .thenReturn(new AnalysisDetailResponse(
+                        id,
+                        "My heart rate is 100 and I cannot sleep",
+                        "en",
+                        "moderate",
+                        "moderate",
+                        Instant.parse("2026-07-12T10:00:00Z"),
+                        result
+                ));
+
+        mockMvc.perform(post("/api/analysis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"text":"My heart rate is 100 and I cannot sleep","language":"en"}
+                                """))
+                .andExpect(status().isOk());
+
+        verify(analysisService).analyse(requestCaptor.capture());
+        assertEquals("deepseek", requestCaptor.getValue().mode());
     }
 
     @Test

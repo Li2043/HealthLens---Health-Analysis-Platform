@@ -93,9 +93,11 @@ validated clinical protocols.
 
 ## Analysis modes (Mock / OpenAI / DeepSeek)
 
+**Default mode:** **DeepSeek** — new visitors and API requests without `mode` use DeepSeek. Users can still switch to **Mock**, **OpenAI**, or **DeepSeek** on the analysis page at any time.
+
 | | **Mock** | **OpenAI** | **DeepSeek** |
 | --- | --- | --- | --- |
-| **Purpose** | Offline demo, CI, zero API cost | Local dev or OpenAI-backed deployments | Hong Kong production deployment |
+| **Purpose** | Offline demo, CI, zero API cost | Local development or OpenAI-backed deployments | Hong Kong production deployment (default) |
 | **Extraction** | Regex / preset samples | OpenAI → structured fields | DeepSeek → structured fields; regex fallback on failure |
 | **Risk** | Rules only | AI adjudicates → rules safety net | DeepSeek adjudicates → rules safety net |
 | **Explanation** | Template text | OpenAI GPT summary + action steps | DeepSeek Chat Completions + action steps |
@@ -104,22 +106,25 @@ validated clinical protocols.
 
 ### LLM provider selection (ai-service)
 
-Set in `healthlens-platform/.env` (never commit). The UI sends `mode` per request; server env selects the backend LLM implementation for evaluation and defaults.
+Set in `healthlens-platform/.env` (never commit). The UI sends `mode` per request; server env selects the backend LLM implementation for evaluation and deployment defaults.
 
 | `LLM_PROVIDER` | Use case |
 | --- | --- |
-| `mock` | Automated tests and zero-cost demos |
+| `mock` | Automated tests and zero-cost offline demos |
 | `openai` | Local development or OpenAI-backed deployments |
-| `deepseek` | Hong Kong production (`DEEPSEEK_API_KEY` required) |
+| `deepseek` | **Recommended default** — Hong Kong production (`DEEPSEEK_API_KEY` required) |
 
 ```env
-LLM_PROVIDER=mock
+EXTRACTOR_PROVIDER=deepseek
+LLM_PROVIDER=deepseek
 OPENAI_API_KEY=
 DEEPSEEK_API_KEY=
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-flash
 DEEPSEEK_TIMEOUT_SECONDS=60
 ```
+
+For offline CI or zero-cost demos, override to `EXTRACTOR_PROVIDER=mock` and `LLM_PROVIDER=mock` in `.env`, or switch the UI to **Mock** mode.
 
 API keys must live only in local or server `.env` files — never in Git, logs, or client code.
 
@@ -244,7 +249,7 @@ Copy-Item .env.example .env
 docker compose up -d --build
 ```
 
-Then open **http://localhost:5173** → Register → ensure **AI** mode in header → run an analysis.
+Then open **http://localhost:5173** → Register or use the **demo account** → default analysis mode is **DeepSeek** (switchable to Mock or OpenAI on the analysis page).
 
 After changing frontend code locally, refresh the browser (`Ctrl+Shift+R`). The Compose file
 mounts `./frontend` into the container for live updates.
@@ -269,7 +274,7 @@ mounts `./frontend` into the container for live updates.
 
 ![Register page (中文)](./docs/images/03-register-zh.png)
 
-2. In the header: toggle **English / 中文**; keep **AI** mode (or switch to Mock — confirm dialog)
+2. On the analysis page: toggle **English / 中文**; default mode is **DeepSeek** (or switch to **Mock** / **OpenAI** manually)
 3. Go to **Analyse**, enter a health note (or use sample text)
 4. Review triage, vitals risk, **What this may mean**, provider badge, and safety check
 5. Open **History** to browse saved results, view details, or **Clear history**
@@ -304,12 +309,11 @@ Content-Type: application/json
 {
   "text": "I have chest pain and shortness of breath.",
   "language": "en",
-  "mode": "ai"
+  "mode": "deepseek"
 }
 ```
 
-`language`: `"en"` or `"zh"` (synced with UI). `mode`: `"mock"` or `"ai"` (default **`ai`**;
-synced with header **AI / Mock** toggle).
+`language`: `"en"` or `"zh"` (synced with UI). `mode`: `"mock"`, `"openai"`, `"deepseek"`, or legacy `"ai"` (default **`deepseek`** when omitted; synced with the analysis page mode selector).
 
 ### Internal API — FastAPI (backend → ai-service)
 
@@ -334,8 +338,8 @@ cd ai-service && pip install -r requirements.txt && pytest -v
 # Backend
 cd backend && ./mvnw test        # Windows: .\mvnw.cmd test
 
-# Frontend build + typecheck
-cd frontend && npm ci && npm run build
+# Frontend unit tests + build
+cd frontend && npm ci && npm test && npm run build
 ```
 
 Evaluation suite (mock, no API key):
@@ -358,12 +362,12 @@ Copy `.env.example` to `.env`. Key variables:
 | `JWT_SECRET` | Token signing (**required** in production) |
 | `JWT_EXPIRATION_MS` | Token lifetime (default 24h) |
 | `OPENAI_API_KEY` | **OpenAI mode** — set in `.env` only (never commit) |
-| `LLM_PROVIDER` | `mock` \| `openai` \| `deepseek` — ai-service LLM backend |
+| `LLM_PROVIDER` | `mock` \| `openai` \| `deepseek` — ai-service LLM backend (default **`deepseek`**) |
 | `DEEPSEEK_API_KEY` | **DeepSeek mode** — required when `LLM_PROVIDER=deepseek` |
 | `DEEPSEEK_BASE_URL` | Default `https://api.deepseek.com` |
 | `DEEPSEEK_MODEL` | Default `deepseek-v4-flash` |
 | `DEEPSEEK_TIMEOUT_SECONDS` | Default `60` |
-| `EXTRACTOR_PROVIDER` | Default `mock`; OpenAI/DeepSeek modes prefer OpenAI extraction when key is set |
+| `EXTRACTOR_PROVIDER` | Default **`deepseek`**; set to `mock` for offline demos |
 | `ENABLE_LEGACY_FRONTEND` | Expose old static UI at `/legacy` on AI service |
 
 **Provider setup:** copy `.env.example` → `.env`, set keys, then

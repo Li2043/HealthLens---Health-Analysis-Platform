@@ -7,8 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { AnalysisMode } from "../types/analysis";
-
-const STORAGE_KEY = "healthlens_analysis_mode";
+import { readStoredMode, writeStoredMode } from "./analysisModeStorage";
 
 type AnalysisModeContextValue = {
   mode: AnalysisMode;
@@ -17,23 +16,12 @@ type AnalysisModeContextValue = {
 
 const AnalysisModeContext = createContext<AnalysisModeContextValue | null>(null);
 
-function readStoredMode(): AnalysisMode {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "mock" || stored === "openai" || stored === "deepseek") {
-    return stored;
-  }
-  if (stored === "ai") {
-    return "openai";
-  }
-  return "openai";
-}
-
 export function AnalysisModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<AnalysisMode>(readStoredMode);
 
   const setMode = useCallback((next: AnalysisMode) => {
     setModeState(next);
-    localStorage.setItem(STORAGE_KEY, next);
+    writeStoredMode(next);
   }, []);
 
   const value = useMemo(

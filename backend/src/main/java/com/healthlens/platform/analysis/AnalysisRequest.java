@@ -18,7 +18,7 @@ public record AnalysisRequest(
             language = "en";
         }
         if (mode == null || mode.isBlank()) {
-            mode = "mock";
+            mode = "deepseek";
         }
     }
 }
