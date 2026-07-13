@@ -25,6 +25,10 @@ services:
       EXTRACTOR_PROVIDER: ${EXTRACTOR_PROVIDER:-mock}
       LLM_PROVIDER: ${LLM_PROVIDER:-mock}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-flash}
+      DEEPSEEK_TIMEOUT_SECONDS: ${DEEPSEEK_TIMEOUT_SECONDS:-60}
       APP_ENV: ${APP_ENV:-docker}
       APP_VERSION: ${APP_VERSION:-dev}
       ENABLE_LEGACY_FRONTEND: ${ENABLE_LEGACY_FRONTEND:-false}
@@ -57,6 +61,11 @@ services:
       # Production: set JWT_SECRET in .env (see docs/deployment.md). Do not use the dev default.
       JWT_SECRET: ${JWT_SECRET:-change-me-use-a-long-random-secret-in-production}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      ANALYSIS_DAILY_LIMIT: ${ANALYSIS_DAILY_LIMIT:-10}
+      DEMO_ACCOUNT_ENABLED: ${DEMO_ACCOUNT_ENABLED:-true}
+      DEMO_ACCOUNT_EMAIL: ${DEMO_ACCOUNT_EMAIL:-demo@healthlens.demo}
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD:-demo1234}
+      DEMO_ANALYSIS_DAILY_LIMIT: ${DEMO_ANALYSIS_DAILY_LIMIT:-20}
     ports:
       - "8080:8080"
     healthcheck:
@@ -76,6 +85,10 @@ services:
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
       VITE_PROXY_TARGET: ${VITE_PROXY_TARGET:-http://backend:8080}
+      VITE_DEMO_ACCOUNT_ENABLED: ${VITE_DEMO_ACCOUNT_ENABLED:-true}
+      VITE_DEMO_ACCOUNT_EMAIL: ${VITE_DEMO_ACCOUNT_EMAIL:-demo@healthlens.demo}
+      VITE_DEMO_ACCOUNT_PASSWORD: ${VITE_DEMO_ACCOUNT_PASSWORD:-demo1234}
+      VITE_DEMO_ANALYSIS_DAILY_LIMIT: ${VITE_DEMO_ANALYSIS_DAILY_LIMIT:-20}
       CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./frontend:/app

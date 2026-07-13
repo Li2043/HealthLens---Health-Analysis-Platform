@@ -101,4 +101,50 @@ class AnalysisControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("text is required"));
     }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void quotaReturnsDailyUsage() throws Exception {
+        when(analysisService.quotaForCurrentUser())
+                .thenReturn(new AnalysisQuotaResponse(10, 3, 7));
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/analysis/quota"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dailyLimit").value(10))
+                .andExpect(jsonPath("$.usedToday").value(3))
+                .andExpect(jsonPath("$.remainingToday").value(7));
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void analyseReturns429WhenDailyLimitReached() throws Exception {
+        when(analysisService.analyse(any(AnalysisRequest.class)))
+                .thenThrow(new DailyAnalysisLimitExceededException("en", 10));
+
+        mockMvc.perform(post("/api/analysis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"text":"My heart rate is 100 and I cannot sleep","language":"en"}
+                                """))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.status").value(429))
+                .andExpect(jsonPath("$.message")
+                        .value("Daily analysis limit reached (10 per day). Try again tomorrow."));
+    }
+
+    @Test
+    @WithMockUser(username = "user@example.com")
+    void analyseReturns429WhenDailyLimitReachedChinese() throws Exception {
+        when(analysisService.analyse(any(AnalysisRequest.class)))
+                .thenThrow(new DailyAnalysisLimitExceededException("zh", 10));
+
+        mockMvc.perform(post("/api/analysis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"text":"心率100，睡不着","language":"zh"}
+                                """))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.message")
+                        .value("今日分析次数已达上限（每日 10 次），请明天再试。"));
+    }
 }

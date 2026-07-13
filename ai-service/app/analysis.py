@@ -38,9 +38,10 @@ def run_analysis(
         if extractor_warning:
             provider_warnings.append(extractor_warning)
 
-        if mode == "ai":
-            ai_assessor, ai_provider, ai_warning = get_ai_risk_assessor(
-                require_openai=False
+        if mode in {"ai", "openai", "deepseek"}:
+            ai_assessor, _, ai_warning = get_ai_risk_assessor(
+                require_openai=False,
+                mode=mode,
             )
             if ai_warning:
                 provider_warnings.append(ai_warning)
@@ -48,7 +49,7 @@ def run_analysis(
             risk_result, adjudication = merge_ai_and_rule_risk(
                 ai_risk, rule_risk, language, mode
             )
-            llm_provider_label = ai_provider
+            llm_provider_label = get_llm_provider_name_for_mode(mode)
         else:
             risk_result = evaluate_risk(structured, text, language=language)
             adjudication = adjudication_from_rules_only(risk_result, mode)

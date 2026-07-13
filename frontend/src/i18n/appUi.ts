@@ -7,13 +7,17 @@ export type AnalysisUiCopy = {
   placeholder: string;
   analysisModeLabel: string;
   modeMock: string;
-  modeAi: string;
+  modeOpenAi: string;
+  modeDeepSeek: string;
   modeMockHint: string;
-  modeAiHint: string;
+  modeOpenAiHint: string;
+  modeDeepSeekHint: string;
   modeMockConfirmTitle: string;
   modeMockConfirmMessage: string;
   modeMockConfirmOk: string;
   modeMockConfirmCancel: string;
+  openaiRegionNotice: string;
+  openaiRegionLinkLabel: string;
   useSample: string;
   analyse: string;
   analysing: string;
@@ -22,6 +26,8 @@ export type AnalysisUiCopy = {
   viewInHistory: string;
   emptyInput: string;
   analysisFailed: string;
+  dailyLimitExceeded: string;
+  dailyQuotaFooter: string;
   timeout: string;
   possibleEmergency: string;
   triage: string;
@@ -59,6 +65,8 @@ export type AppUiCopy = {
     needAccount: string;
     registerLink: string;
     failed: string;
+    demoNotice: string;
+    demoFill: string;
   };
   register: {
     title: string;
@@ -113,6 +121,9 @@ const EN: AppUiCopy = {
     needAccount: "Need an account?",
     registerLink: "Register",
     failed: "Login failed. Please check your credentials.",
+    demoNotice:
+      "Demo account ({limit} analyses/day): {email} / {password}",
+    demoFill: "Use demo account",
   },
   register: {
     title: "Register",
@@ -133,14 +144,18 @@ const EN: AppUiCopy = {
     placeholder: "e.g. My heart rate is 100 and I cannot sleep.",
     analysisModeLabel: "Analysis mode",
     modeMock: "Mock",
-    modeAi: "AI",
+    modeOpenAi: "OpenAI",
+    modeDeepSeek: "DeepSeek",
     modeMockHint: "Rules only — less accurate; for testing and offline use.",
-    modeAiHint: "AI adjudicates risk first; rules catch missed major risks.",
+    modeOpenAiHint: "OpenAI adjudicates risk first; rules catch missed major risks.",
+    modeDeepSeekHint: "DeepSeek adjudicates risk first; rules catch missed major risks.",
     modeMockConfirmTitle: "Switch to Mock mode?",
     modeMockConfirmMessage:
-      "Mock mode uses rule-based matching only. Results are less accurate and are intended for testing and offline use. For real analysis, please use AI mode.",
+      "Mock mode uses rule-based matching only. Results are less accurate and are intended for testing and offline use. For real analysis, please use OpenAI or DeepSeek.",
     modeMockConfirmOk: "Switch to Mock",
-    modeMockConfirmCancel: "Stay on AI",
+    modeMockConfirmCancel: "Stay on current mode",
+    openaiRegionNotice: "OpenAI may not be available in all regions.",
+    openaiRegionLinkLabel: "OpenAI supported countries and regional availability",
     useSample: "Use sample",
     analyse: "Analyse",
     analysing: "Analysing…",
@@ -149,6 +164,9 @@ const EN: AppUiCopy = {
     viewInHistory: "View in history",
     emptyInput: "Please enter your health note.",
     analysisFailed: "Analysis failed. Please try again.",
+    dailyLimitExceeded:
+      "Daily analysis limit reached (10 per day). Try again tomorrow.",
+    dailyQuotaFooter: "Daily limit: {used} / {limit} analyses per account (resets at UTC midnight).",
     timeout: "Analysis timed out. Please try again.",
     possibleEmergency: "Possible emergency",
     triage: "Triage",
@@ -213,6 +231,8 @@ const ZH: AppUiCopy = {
     needAccount: "还没有账号？",
     registerLink: "去注册",
     failed: "登录失败，请检查邮箱和密码。",
+    demoNotice: "演示账号（每日 {limit} 次）：{email} / {password}",
+    demoFill: "填入演示账号",
   },
   register: {
     title: "注册",
@@ -232,14 +252,18 @@ const ZH: AppUiCopy = {
     placeholder: "例如：心率 100，睡不着。",
     analysisModeLabel: "分析模式",
     modeMock: "Mock",
-    modeAi: "AI",
+    modeOpenAi: "OpenAI",
+    modeDeepSeek: "DeepSeek",
     modeMockHint: "仅规则匹配，准确性较低，仅供测试与离线使用。",
-    modeAiHint: "AI 先裁定风险；规则安全网弥补 AI 遗漏的重大风险。",
+    modeOpenAiHint: "OpenAI 先裁定风险；规则安全网弥补 AI 遗漏的重大风险。",
+    modeDeepSeekHint: "DeepSeek 先裁定风险；规则安全网弥补 AI 遗漏的重大风险。",
     modeMockConfirmTitle: "切换到 Mock 模式？",
     modeMockConfirmMessage:
-      "Mock 模式仅使用规则匹配，结果准确性较低，仅供测试和离线演示。正式分析请使用 AI 模式。",
+      "Mock 模式仅使用规则匹配，结果准确性较低，仅供测试和离线演示。正式分析请使用 OpenAI 或 DeepSeek。",
     modeMockConfirmOk: "切换到 Mock",
-    modeMockConfirmCancel: "继续使用 AI",
+    modeMockConfirmCancel: "保持当前模式",
+    openaiRegionNotice: "OpenAI 可能在部分地区无法使用。",
+    openaiRegionLinkLabel: "查看 OpenAI 支持的国家与地区说明",
     useSample: "使用示例",
     analyse: "开始分析",
     analysing: "分析中…",
@@ -248,6 +272,8 @@ const ZH: AppUiCopy = {
     viewInHistory: "查看历史记录",
     emptyInput: "请输入健康描述。",
     analysisFailed: "分析失败，请重试。",
+    dailyLimitExceeded: "今日分析次数已达上限（每日 10 次），请明天再试。",
+    dailyQuotaFooter: "每账户每日限额 {limit} 次分析（UTC 零点重置），今日已用 {used} / {limit} 次。",
     timeout: "分析超时，请重试。",
     possibleEmergency: "疑似紧急情况",
     triage: "分诊等级",

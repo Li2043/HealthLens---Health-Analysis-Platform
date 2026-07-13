@@ -19,7 +19,9 @@ from app.config import (
     EXTRACTOR_PROVIDER,
     LLM_PROVIDER,
     SERVICE_NAME,
+    is_deepseek_provider_misconfigured,
     is_openai_provider_misconfigured,
+    is_provider_misconfigured,
 )
 from app.errors import (
     ANALYSIS_FAILED_ERROR,
@@ -61,6 +63,11 @@ def log_startup() -> None:
         logger.warning(
             "OpenAI provider selected but OPENAI_API_KEY is not set; "
             "extractor/LLM may fall back to mock providers."
+        )
+    if is_deepseek_provider_misconfigured():
+        logger.warning(
+            "DeepSeek provider selected but DEEPSEEK_API_KEY is not set; "
+            "DeepSeek requests will fail until configured."
         )
 
 
@@ -138,7 +145,7 @@ async def analyse(request: HealthInputRequest):
     if validation_error is not None:
         return validation_error
 
-    if is_openai_provider_misconfigured() and APP_ENV.lower() in {"production", "prod"}:
+    if is_provider_misconfigured() and APP_ENV.lower() in {"production", "prod"}:
         return PROVIDER_CONFIGURATION_ERROR
 
     try:

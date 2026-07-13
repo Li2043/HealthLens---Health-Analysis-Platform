@@ -113,7 +113,7 @@ def apply_emergency_to_adjudication(
         update={
             "final_risk_level": "emergency",
             "adjudicated_by": "ai_with_emergency_override"
-            if adjudication.mode == "ai"
+            if adjudication.mode in {"ai", "openai", "deepseek"}
             else "rules",
             "override_reason": reason,
         }

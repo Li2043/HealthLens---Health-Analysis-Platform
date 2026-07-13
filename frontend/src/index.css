@@ -58,6 +58,37 @@ a {
   flex-wrap: wrap;
 }
 
+.analysis-mode-toggle {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.analysis-mode-toggle .pill-toggle-slider {
+  width: calc(33.333% - 2px);
+}
+
+.analysis-mode-toggle.openai .pill-toggle-slider,
+.analysis-mode-toggle.openai .analysis-mode-toggle-slider {
+  transform: translateX(100%);
+}
+
+.analysis-mode-toggle.deepseek .pill-toggle-slider,
+.analysis-mode-toggle.deepseek .analysis-mode-toggle-slider {
+  transform: translateX(200%);
+}
+
+.analysis-mode-toggle.mock .pill-toggle-slider,
+.analysis-mode-toggle.mock .analysis-mode-toggle-slider {
+  transform: translateX(0%);
+}
+
+.analysis-mode-toggle .pill-toggle-option {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 4.2rem;
+  padding: 0.45rem 0.65rem;
+}
+
 .language-toggle,
 .analysis-mode-toggle,
 .pill-toggle {
@@ -96,11 +127,6 @@ a {
 
 .language-toggle.zh .pill-toggle-slider,
 .language-toggle.zh .language-toggle-slider {
-  transform: translateX(100%);
-}
-
-.analysis-mode-toggle.mock .pill-toggle-slider,
-.analysis-mode-toggle.mock .analysis-mode-toggle-slider {
   transform: translateX(100%);
 }
 
@@ -192,7 +218,92 @@ section h1 {
 
 .analysis-page .page-intro {
   color: #486581;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.openai-region-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: #fff8e6;
+  border: 1px solid #f0dca8;
+  color: #7a5d00;
+  font-size: 0.92rem;
+}
+
+.info-icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #0b7285;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.info-icon-link:hover {
+  background: #095c6a;
+}
+
+.analysis-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.analysis-page-header h1 {
+  margin: 0;
+}
+
+.analysis-mode-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: #486581;
+}
+
+.analysis-mode-select-text {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.analysis-mode-select {
+  min-width: 8.5rem;
+  padding: 0.45rem 2rem 0.45rem 0.65rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23486581' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #102a43;
+  cursor: pointer;
+  appearance: none;
+}
+
+.analysis-mode-select:focus {
+  outline: 2px solid #0b7285;
+  outline-offset: 1px;
+}
+
+.analysis-mode-hint {
+  margin: 0 0 1.25rem;
+  color: #627d98;
+  font-size: 0.92rem;
+  line-height: 1.5;
 }
 
 .analysis-form textarea {
@@ -225,23 +336,13 @@ section h1 {
   gap: 1rem;
 }
 
-.analysis-mode-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
-  background: #fff;
-  border: 1px solid #d9e2ec;
-  border-radius: 6px;
-}
-
-.analysis-mode-hint {
-  margin: 0.25rem 0 0;
-  color: #486581;
+.analysis-quota-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d9e2ec;
+  color: #627d98;
   font-size: 0.9rem;
+  text-align: center;
 }
 
 .provider-warning {
@@ -463,6 +564,36 @@ section h1 {
   flex-direction: column;
   gap: 0.75rem;
   max-width: 420px;
+}
+
+.demo-account-panel {
+  max-width: 420px;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #ffe08a;
+  border-radius: 8px;
+  background: #fff9db;
+  color: #5c4b00;
+}
+
+.demo-account-panel p {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.demo-account-panel .secondary-button {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #243b53;
+  cursor: pointer;
+}
+
+.demo-account-panel .secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .auth-form input {

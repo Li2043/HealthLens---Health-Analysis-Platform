@@ -32,3 +32,10 @@ healthlens:
   jwt:
     secret: ${JWT_SECRET:change-me-use-a-long-random-secret-in-production}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  analysis:
+    daily-limit: ${ANALYSIS_DAILY_LIMIT:10}
+  demo-account:
+    enabled: ${DEMO_ACCOUNT_ENABLED:true}
+    email: ${DEMO_ACCOUNT_EMAIL:demo@healthlens.demo}
+    password: ${DEMO_ACCOUNT_PASSWORD:demo1234}
+    daily-limit: ${DEMO_ANALYSIS_DAILY_LIMIT:20}

@@ -50,13 +50,13 @@ AI** 分析模式，以及 Docker Compose 一键本地全栈运行。
 
 | 功能 | 说明 |
 | --- | --- |
-| **Mock / AI 双模式** | **AI**（默认）：配置 `OPENAI_API_KEY` 时用 OpenAI 提取、裁定、说明；规则作安全网。**Mock**：离线规则 + 模板；切到 Mock 会弹出警告确认框 |
+| **Mock / OpenAI / DeepSeek** | 顶部滑块选择：**Mock**（规则+模板）、**OpenAI** 或 **DeepSeek**；规则安全网始终生效 |
 | **结构化 AI 管线** | 提取 → 风险裁定 → 升级 → 说明 → 安全校验 |
 | **紧急覆盖** | 红旗症状（胸痛、中风征象等）提升分诊，即使体征风险仍为低 |
 | **健康状况说明** | 按风险分级：低风险安慰与日常建议；中风险可能原因与应对；高/紧急含急救电话与第一步措施 |
 | **JWT 认证** | 注册、登录、受保护的分析接口 |
 | **分析历史** | 持久化、浏览，并支持**清空全部**历史记录 |
-| **双语界面** | 顶部 **English / 中文** 与 **AI / Mock** 胶囊滑块；API `language` 与界面同步 |
+| **双语界面** | 顶部 **English / 中文** 与 **Mock / OpenAI / DeepSeek** 胶囊滑块；API `language` 与界面同步 |
 | **双语提取** | 中英文心率/血压（如 `heart rate 200` 与 `心率200`） |
 | **Docker Compose** | 一条命令启动全栈；前端源码挂载便于开发热更新 |
 
@@ -83,22 +83,43 @@ AI** 分析模式，以及 Docker Compose 一键本地全栈运行。
 
 ---
 
-## Mock 与 AI 模式
+## 分析模式（Mock / OpenAI / DeepSeek）
 
-| | **AI 模式**（默认） | **Mock 模式** |
-| --- | --- | --- |
-| **用途** | 配置 Key 后的真实分析 | 离线演示、CI、测试 |
-| **提取** | OpenAI → 结构化字段；失败则 regex | 正则 / 预设样例 |
-| **风险** | AI 裁定 → 规则安全网（只升不降） | 仅规则 |
-| **说明** | GPT 健康解读 + 分级行动建议模板 | 模板化「情况说明」 |
-| **Provider** | `openai` 或 `mock-ai`（无 Key） | `mock` |
-| **切换** | AI → Mock 时弹出**确认对话框**（准确性低，仅供测试） |
+| | **Mock** | **OpenAI** | **DeepSeek** |
+| --- | --- | --- | --- |
+| **用途** | 离线演示、CI、零 API 成本 | 本地开发或 OpenAI 部署 | 香港线上部署 |
+| **提取** | 正则 / 预设样例 | OpenAI → 结构化字段 | DeepSeek → 结构化字段；失败则 regex 回退 |
+| **风险** | 仅规则 | AI 裁定 → 规则安全网 | DeepSeek 裁定 → 规则安全网 |
+| **说明** | 模板化「情况说明」 | GPT 解读 + 行动建议 | DeepSeek Chat Completions + 行动建议 |
+| **Provider** | `mock` | `openai` 或 `mock-ai` | `deepseek` |
+| **切换** | 从付费模式切到 Mock 时弹出**确认对话框** | | |
+
+### LLM Provider 选择（ai-service）
+
+在 `healthlens-platform/.env` 中配置（勿提交 Git）。UI 每次请求发送 `mode`；服务端 env 用于评估套件与默认行为。
+
+| `LLM_PROVIDER` | 用途 |
+| --- | --- |
+| `mock` | 自动化测试与零成本演示 |
+| `openai` | 本地开发或其他 OpenAI 部署 |
+| `deepseek` | 香港线上部署（需 `DEEPSEEK_API_KEY`） |
+
+API Key 只能保存在本地或服务器 `.env` 中，不能提交 Git、写入日志或前端代码。
 
 配置 OpenAI（Docker）：
 
 ```powershell
 # 写在 healthlens-platform/.env（不要写在 .env.example）
 OPENAI_API_KEY=sk-...
+
+docker compose up -d --build ai-service
+```
+
+配置 DeepSeek（Docker）：
+
+```powershell
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your-key-here
 
 docker compose up -d --build ai-service
 ```
@@ -314,13 +335,18 @@ curl -X POST "http://127.0.0.1:8000/evaluation/run?provider=mock"
 | `VITE_API_BASE_URL` | 前端 → 后端（Docker 内为 `/api`，由 Vite 代理到 backend） |
 | `JWT_SECRET` | 令牌签名（**生产环境必填**） |
 | `JWT_EXPIRATION_MS` | 令牌有效期（默认 24 小时） |
-| `OPENAI_API_KEY` | **AI 模式** — 仅写在 `.env`（勿提交 Git）；注入 ai-service |
-| `LLM_PROVIDER` / `EXTRACTOR_PROVIDER` | 默认 `mock`；AI 模式有 Key 时优先 OpenAI |
+| `OPENAI_API_KEY` | **OpenAI 模式** — 仅写在 `.env`（勿提交 Git） |
+| `LLM_PROVIDER` | `mock` \| `openai` \| `deepseek` |
+| `DEEPSEEK_API_KEY` | **DeepSeek 模式** — `LLM_PROVIDER=deepseek` 时必填 |
+| `DEEPSEEK_BASE_URL` | 默认 `https://api.deepseek.com` |
+| `DEEPSEEK_MODEL` | 默认 `deepseek-v4-flash` |
+| `DEEPSEEK_TIMEOUT_SECONDS` | 默认 `60` |
+| `EXTRACTOR_PROVIDER` | 默认 `mock` |
 | `ENABLE_LEGACY_FRONTEND` | 在 AI 服务上暴露旧版静态 UI（`/legacy`） |
 
-**OpenAI 配置：** 复制 `.env.example` → `.env`，填入 Key 后执行
-`docker compose up -d --build ai-service`。无 Key 时 AI 模式为 **`mock-ai`**
-（模拟 AI 裁定 + 模板说明）。
+**Provider 配置：** 复制 `.env.example` → `.env`，填入 Key 后执行
+`docker compose up -d --build ai-service`。OpenAI 模式无 Key 时为 **`mock-ai`**。
+DeepSeek 模式需配置 `DEEPSEEK_API_KEY`。
 
 切勿提交真实密钥。生产 JWT 配置见
 [`docs/deployment.md`](./docs/deployment.md)。

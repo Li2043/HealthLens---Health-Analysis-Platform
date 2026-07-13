@@ -16,20 +16,30 @@ public class AnalysisService {
     private final AiServiceClient aiServiceClient;
     private final AnalysisRecordRepository analysisRecordRepository;
     private final AuthenticatedUserService authenticatedUserService;
+    private final AnalysisQuotaService analysisQuotaService;
 
     public AnalysisService(
             AiServiceClient aiServiceClient,
             AnalysisRecordRepository analysisRecordRepository,
-            AuthenticatedUserService authenticatedUserService
+            AuthenticatedUserService authenticatedUserService,
+            AnalysisQuotaService analysisQuotaService
     ) {
         this.aiServiceClient = aiServiceClient;
         this.analysisRecordRepository = analysisRecordRepository;
         this.authenticatedUserService = authenticatedUserService;
+        this.analysisQuotaService = analysisQuotaService;
+    }
+
+    @Transactional(readOnly = true)
+    public AnalysisQuotaResponse quotaForCurrentUser() {
+        User user = authenticatedUserService.requireCurrentUser();
+        return analysisQuotaService.getQuotaStatus(user);
     }
 
     @Transactional
     public AnalysisDetailResponse analyse(AnalysisRequest request) {
         User user = authenticatedUserService.requireCurrentUser();
+        analysisQuotaService.enforceDailyLimit(user, request.language());
         JsonNode result = aiServiceClient.analyse(request);
 
         AnalysisRecord record = new AnalysisRecord(

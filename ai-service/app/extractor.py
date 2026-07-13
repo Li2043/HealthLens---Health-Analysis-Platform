@@ -265,6 +265,11 @@ def get_extractor() -> tuple[BaseHealthExtractor, str, str | None]:
             return MockLLMExtractor(), "mock", warning
         return OpenAILLMExtractor(api_key=api_key), "openai", None
 
+    if provider == "deepseek":
+        from app.deepseek_extractor import create_deepseek_extractor
+
+        return create_deepseek_extractor(), "deepseek", None
+
     if provider == "regex":
         return RegexFallbackExtractor(), "regex", None
 
@@ -272,13 +277,22 @@ def get_extractor() -> tuple[BaseHealthExtractor, str, str | None]:
 
 
 def get_extractor_for_mode(mode: str = "mock") -> tuple[BaseHealthExtractor, str, str | None]:
-    """Prefer OpenAI extraction in AI analysis mode when an API key is available."""
-    if mode == "ai":
+    """Select extractor based on analysis mode."""
+    if mode == "deepseek":
+        from app.deepseek_extractor import create_deepseek_extractor
+
+        return create_deepseek_extractor(), "deepseek", None
+
+    if mode in {"ai", "openai"}:
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key:
             try:
                 return OpenAILLMExtractor(api_key=api_key), "openai", None
             except Exception:
                 pass
-        return MockLLMExtractor(), "mock", "OPENAI_API_KEY missing; using mock extractor in AI mode."
+        return (
+            MockLLMExtractor(),
+            "mock",
+            "OPENAI_API_KEY missing; using mock extractor in OpenAI mode.",
+        )
     return get_extractor()

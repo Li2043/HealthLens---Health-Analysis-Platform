@@ -1,5 +1,5 @@
 export type Language = "en" | "zh";
-export type AnalysisMode = "mock" | "ai";
+export type AnalysisMode = "mock" | "openai" | "deepseek";
 export type RiskLevel = "low" | "moderate" | "high" | "emergency";
 export type TriageTier = "low" | "moderate" | "high" | "emergency";
 
@@ -64,6 +64,12 @@ export type AnalysisSummary = {
   riskLevel: RiskLevel;
   triageTier: TriageTier;
   createdAt: string;
+};
+
+export type AnalysisQuota = {
+  dailyLimit: number;
+  usedToday: number;
+  remainingToday: number;
 };
 
 export type AnalysisDetail = {

@@ -1,28 +1,49 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isAxiosError } from "axios";
 import { useAnalysisMode } from "../analysis/AnalysisModeContext";
-import { submitAnalysis } from "../api/analysisApi";
+import { fetchAnalysisQuota, submitAnalysis } from "../api/analysisApi";
+import { AnalysisModeToggle } from "../components/AnalysisModeToggle";
 import { AnalysisResultPanel } from "../components/AnalysisResultPanel";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
-import type { AnalysisDetail } from "../types/analysis";
+import type { AnalysisDetail, AnalysisQuota } from "../types/analysis";
+
+const OPENAI_REGION_HELP_URL =
+  "https://help.openai.com/en/articles/8660928-openai-api-supported-countries-and-territories";
 
 const SAMPLE_TEXT = {
   en: "My heart rate is 100 and I cannot sleep.",
   zh: "心率100，睡不着，心情低落。",
 } as const;
 
-function getErrorMessage(error: unknown, fallback: string, timeout: string): string {
+function getErrorMessage(
+  error: unknown,
+  fallback: string,
+  timeout: string,
+  dailyLimitExceeded: string,
+): string {
   if (isAxiosError(error)) {
     const message = error.response?.data?.message;
     if (typeof message === "string" && message.length > 0) {
       return message;
+    }
+    if (error.response?.status === 429) {
+      return dailyLimitExceeded;
     }
     if (error.code === "ECONNABORTED") {
       return timeout;
     }
   }
   return fallback;
+}
+
+function formatDailyQuotaFooter(
+  template: string,
+  quota: AnalysisQuota,
+): string {
+  return template
+    .replaceAll("{used}", String(quota.usedToday))
+    .replaceAll("{limit}", String(quota.dailyLimit));
 }
 
 export function AnalysisPage() {
@@ -34,6 +55,20 @@ export function AnalysisPage() {
   const [loading, setLoading] = useState(false);
   const [savedAnalysis, setSavedAnalysis] = useState<AnalysisDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quota, setQuota] = useState<AnalysisQuota | null>(null);
+
+  const loadQuota = useCallback(async () => {
+    try {
+      const data = await fetchAnalysisQuota();
+      setQuota(data);
+    } catch {
+      setQuota({ dailyLimit: 10, usedToday: 0, remainingToday: 10 });
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadQuota();
+  }, [loadQuota]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,10 +85,19 @@ export function AnalysisPage() {
     try {
       const data = await submitAnalysis({ text: text.trim(), language, mode });
       setSavedAnalysis(data);
+      await loadQuota();
     } catch (err) {
       setError(
-        getErrorMessage(err, analysisUi.analysisFailed, analysisUi.timeout),
+        getErrorMessage(
+          err,
+          analysisUi.analysisFailed,
+          analysisUi.timeout,
+          analysisUi.dailyLimitExceeded,
+        ),
       );
+      if (isAxiosError(err) && err.response?.status === 429) {
+        await loadQuota();
+      }
     } finally {
       setLoading(false);
     }
@@ -66,19 +110,35 @@ export function AnalysisPage() {
 
   return (
     <section className="analysis-page">
-      <h1>{analysisUi.pageTitle}</h1>
+      <p className="openai-region-notice">
+        <span>{analysisUi.openaiRegionNotice}</span>
+        <a
+          href={OPENAI_REGION_HELP_URL}
+          className="info-icon-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          title={analysisUi.openaiRegionLinkLabel}
+          aria-label={analysisUi.openaiRegionLinkLabel}
+        >
+          i
+        </a>
+      </p>
+
+      <div className="analysis-page-header">
+        <h1>{analysisUi.pageTitle}</h1>
+        <AnalysisModeToggle />
+      </div>
+
       <p className="page-intro">{analysisUi.pageIntro}</p>
+      <p className="analysis-mode-hint">
+        {mode === "mock"
+          ? analysisUi.modeMockHint
+          : mode === "openai"
+            ? analysisUi.modeOpenAiHint
+            : analysisUi.modeDeepSeekHint}
+      </p>
 
       <form className="analysis-form" onSubmit={handleSubmit}>
-        <div className="analysis-mode-row">
-          <div>
-            <span className="field-label">{analysisUi.analysisModeLabel}</span>
-            <p className="analysis-mode-hint">
-              {mode === "ai" ? analysisUi.modeAiHint : analysisUi.modeMockHint}
-            </p>
-          </div>
-        </div>
-
         <label className="field-label" htmlFor="health-note">
           {analysisUi.healthNote}
         </label>
@@ -124,6 +184,12 @@ export function AnalysisPage() {
           </p>
           <AnalysisResultPanel result={savedAnalysis.result} />
         </>
+      )}
+
+      {quota && (
+        <p className="analysis-quota-footer">
+          {formatDailyQuotaFooter(analysisUi.dailyQuotaFooter, quota)}
+        </p>
       )}
     </section>
   );

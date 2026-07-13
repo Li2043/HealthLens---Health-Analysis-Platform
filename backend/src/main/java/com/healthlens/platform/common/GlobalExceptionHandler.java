@@ -3,6 +3,7 @@ package com.healthlens.platform.common;
 import com.healthlens.platform.auth.EmailAlreadyRegisteredException;
 import com.healthlens.platform.auth.InvalidCredentialsException;
 import com.healthlens.platform.analysis.AnalysisNotFoundException;
+import com.healthlens.platform.analysis.DailyAnalysisLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,14 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(DailyAnalysisLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleDailyAnalysisLimit(
+            DailyAnalysisLimitExceededException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

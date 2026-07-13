@@ -4,6 +4,8 @@ import os
 import re
 from abc import ABC, abstractmethod
 
+from app.errors import ProviderConfigurationError
+
 from app.escalation import detect_emergency_patterns
 from app.extraction_validator import blood_pressure_mentioned
 from app.schemas import Language, RiskAdjudication, RiskLevel, RiskResult, StructuredHealthInput
@@ -566,31 +568,9 @@ class OpenAILLMService(LLMService):
         language: Language = "en",
         adjudication: RiskAdjudication | None = None,
     ) -> str:
-        if language == "zh":
-            user_prompt = (
-                f"原始用户输入：{source_text}\n"
-                f"结构化输入：{structured.model_dump_json()}\n"
-                f"风险结果：{risk.model_dump_json()}\n"
-                f"风险等级：{risk.risk_level}\n"
-                "请用简体中文，向用户说明其当前健康状况可能意味着什么。"
-                "只写健康情况解读（症状、体征、情绪、睡眠及需留意之处），"
-                "不要写急救电话、就医步骤或日常改善建议（这些会由系统另行补充）。"
-                "不要描述系统如何工作。"
-            )
-            instructions = SYSTEM_PROMPT_ZH
-        else:
-            user_prompt = (
-                f"Original user input: {source_text}\n"
-                f"Structured input: {structured.model_dump_json()}\n"
-                f"Risk result: {risk.model_dump_json()}\n"
-                f"Risk level: {risk.risk_level}\n"
-                "Explain what the user's health situation may mean. "
-                "Write only the health interpretation (symptoms, vitals, mood, sleep, "
-                "and what to watch for). Do not include emergency numbers, care steps, "
-                "or daily self-care advice; those are appended separately. "
-                "Do not describe how the system works."
-            )
-            instructions = SYSTEM_PROMPT
+        instructions, user_prompt = build_explanation_prompts(
+            structured, risk, source_text, language
+        )
 
         client = self._get_client()
         response = client.responses.create(
@@ -612,21 +592,65 @@ class OpenAILLMService(LLMService):
         return _strip_markdown(" ".join(parts))
 
 
+def build_explanation_prompts(
+    structured: StructuredHealthInput,
+    risk: RiskResult,
+    source_text: str,
+    language: Language,
+) -> tuple[str, str]:
+    """Shared system/user prompts for OpenAI and DeepSeek explanation providers."""
+    if language == "zh":
+        user_prompt = (
+            f"原始用户输入：{source_text}\n"
+            f"结构化输入：{structured.model_dump_json()}\n"
+            f"风险结果：{risk.model_dump_json()}\n"
+            f"风险等级：{risk.risk_level}\n"
+            "请用简体中文，向用户说明其当前健康状况可能意味着什么。"
+            "只写健康情况解读（症状、体征、情绪、睡眠及需留意之处），"
+            "不要写急救电话、就医步骤或日常改善建议（这些会由系统另行补充）。"
+            "不要描述系统如何工作。"
+        )
+        return SYSTEM_PROMPT_ZH, user_prompt
+
+    user_prompt = (
+        f"Original user input: {source_text}\n"
+        f"Structured input: {structured.model_dump_json()}\n"
+        f"Risk result: {risk.model_dump_json()}\n"
+        f"Risk level: {risk.risk_level}\n"
+        "Explain what the user's health situation may mean. "
+        "Write only the health interpretation (symptoms, vitals, mood, sleep, "
+        "and what to watch for). Do not include emergency numbers, care steps, "
+        "or daily self-care advice; those are appended separately. "
+        "Do not describe how the system works."
+    )
+    return SYSTEM_PROMPT, user_prompt
+
+
 def get_llm_service_for_mode(mode: str = "mock") -> LLMService:
     """Return LLM provider for explanation generation based on analysis mode."""
-    if mode == "ai":
+    if mode == "mock":
+        return MockLLMService()
+    if mode == "deepseek":
+        from app.deepseek_llm_service import create_deepseek_llm_service
+
+        return create_deepseek_llm_service()
+    if mode in {"ai", "openai"}:
         api_key = os.getenv("OPENAI_API_KEY")
         if api_key:
             try:
                 return OpenAILLMService(api_key=api_key)
             except Exception:
                 return MockLLMService()
-    return MockLLMService()
+        return MockLLMService()
+    raise ProviderConfigurationError(f"Unknown analysis mode: {mode}")
 
 
 def get_llm_service() -> LLMService:
-    """Return the configured LLM provider. Defaults to mock; falls back if OpenAI unavailable."""
+    """Return the configured LLM provider from LLM_PROVIDER."""
     provider = os.getenv("LLM_PROVIDER", "mock").lower()
+
+    if provider == "mock":
+        return MockLLMService()
 
     if provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
@@ -637,13 +661,20 @@ def get_llm_service() -> LLMService:
         except Exception:
             return MockLLMService()
 
-    return MockLLMService()
+    if provider == "deepseek":
+        from app.deepseek_llm_service import create_deepseek_llm_service
+
+        return create_deepseek_llm_service()
+
+    raise ProviderConfigurationError(f"Unknown LLM_PROVIDER: {provider}")
 
 
 def get_llm_provider_name_for_mode(mode: str = "mock") -> str:
-    if mode == "ai" and os.getenv("OPENAI_API_KEY"):
+    if mode == "deepseek":
+        return "deepseek"
+    if mode in {"ai", "openai"} and os.getenv("OPENAI_API_KEY"):
         return "openai"
-    if mode == "ai":
+    if mode in {"ai", "openai"}:
         return "mock-ai"
     return get_llm_provider_name()
 
@@ -653,4 +684,8 @@ def get_llm_provider_name() -> str:
     provider = os.getenv("LLM_PROVIDER", "mock").lower()
     if provider == "openai" and os.getenv("OPENAI_API_KEY"):
         return "openai"
-    return "mock"
+    if provider == "deepseek":
+        return "deepseek"
+    if provider == "mock":
+        return "mock"
+    return provider

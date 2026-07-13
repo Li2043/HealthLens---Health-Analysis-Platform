@@ -1,4 +1,5 @@
 import type { AnalysisResponse } from "../types/analysis";
+import { isPaidAnalysisMode } from "../analysis/AnalysisModeContext";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
 
 type AnalysisResultPanelProps = {
@@ -50,7 +51,7 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
         </span>
       </div>
 
-      {risk_adjudication?.mode === "ai" && (
+      {risk_adjudication?.mode && isPaidAnalysisMode(risk_adjudication.mode) && (
         <p className="adjudication-note">{analysisUi.aiAdjudicationNote}</p>
       )}
 

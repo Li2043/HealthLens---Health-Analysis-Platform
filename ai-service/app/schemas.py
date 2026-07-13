@@ -12,7 +12,7 @@ TriageTier = Literal["low", "moderate", "high", "emergency"]
 
 
 Language = Literal["en", "zh"]
-AnalysisMode = Literal["mock", "ai"]
+AnalysisMode = Literal["mock", "ai", "openai", "deepseek"]
 
 
 class HealthInputRequest(BaseModel):
@@ -20,7 +20,7 @@ class HealthInputRequest(BaseModel):
     language: Language = Field(default="en", description="Response language: en or zh")
     mode: AnalysisMode = Field(
         default="mock",
-        description="mock = rules adjudicate risk; ai = AI adjudicates, rules safety net",
+        description="mock = rules only; openai/deepseek/ai = AI adjudication with provider-specific LLM",
     )
 
 

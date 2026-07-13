@@ -1,9 +1,15 @@
 import type {
   AnalysisDetail,
+  AnalysisQuota,
   AnalysisRequest,
   AnalysisSummary,
 } from "../types/analysis";
 import { apiClient } from "./client";
+
+export async function fetchAnalysisQuota(): Promise<AnalysisQuota> {
+  const { data } = await apiClient.get<AnalysisQuota>("/analysis/quota");
+  return data;
+}
 
 export async function submitAnalysis(
   request: AnalysisRequest,

@@ -171,7 +171,15 @@ class OpenAiRiskAssessor(AiRiskAssessor):
         )
 
 
-def get_ai_risk_assessor(require_openai: bool = False) -> tuple[AiRiskAssessor, str, str | None]:
+def get_ai_risk_assessor(
+    require_openai: bool = False,
+    mode: str = "ai",
+) -> tuple[AiRiskAssessor, str, str | None]:
+    if mode == "deepseek":
+        from app.deepseek_risk_service import create_deepseek_risk_assessor
+
+        return create_deepseek_risk_assessor(), "deepseek", None
+
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
         try:
@@ -182,7 +190,7 @@ def get_ai_risk_assessor(require_openai: bool = False) -> tuple[AiRiskAssessor, 
 
     if require_openai:
         raise ProviderConfigurationError(
-            "OPENAI_API_KEY is required for AI mode but is not configured."
+            "OPENAI_API_KEY is required for OpenAI mode but is not configured."
         )
 
     return (

@@ -2,6 +2,7 @@ import { isAxiosError } from "axios";
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { demoAccountConfig } from "../config/demoAccount";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -12,6 +13,13 @@ function getErrorMessage(error: unknown, fallback: string): string {
     }
   }
   return fallback;
+}
+
+function formatDemoNotice(template: string): string {
+  return template
+    .replaceAll("{email}", demoAccountConfig.email)
+    .replaceAll("{password}", demoAccountConfig.password)
+    .replaceAll("{limit}", String(demoAccountConfig.dailyLimit));
 }
 
 export function LoginPage() {
@@ -45,10 +53,30 @@ export function LoginPage() {
     }
   }
 
+  function fillDemoAccount() {
+    setEmail(demoAccountConfig.email);
+    setPassword(demoAccountConfig.password);
+    setError(null);
+  }
+
   return (
     <section className="auth-page">
       <h1>{ui.login.title}</h1>
       <p className="page-intro">{ui.login.intro}</p>
+
+      {demoAccountConfig.enabled && (
+        <div className="demo-account-panel">
+          <p>{formatDemoNotice(ui.login.demoNotice)}</p>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={fillDemoAccount}
+            disabled={loading}
+          >
+            {ui.login.demoFill}
+          </button>
+        </div>
+      )}
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label className="field-label" htmlFor="login-email">

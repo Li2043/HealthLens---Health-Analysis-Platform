@@ -1,6 +1,5 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { AnalysisModeToggle } from "../components/AnalysisModeToggle";
 import { LanguageToggle } from "../components/LanguageToggle";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
 
@@ -21,7 +20,6 @@ export function MainLayout() {
         <div className="app-header-actions">
           <div className="app-header-toggles">
             <LanguageToggle />
-            {isAuthenticated && <AnalysisModeToggle />}
           </div>
           <nav className="app-nav">
             {isAuthenticated && (

@@ -23,6 +23,11 @@ public class AnalysisController {
         this.analysisService = analysisService;
     }
 
+    @GetMapping("/quota")
+    public ResponseEntity<AnalysisQuotaResponse> quota() {
+        return ResponseEntity.ok(analysisService.quotaForCurrentUser());
+    }
+
     @PostMapping
     public ResponseEntity<AnalysisDetailResponse> analyse(@Valid @RequestBody AnalysisRequest request) {
         return ResponseEntity.ok(analysisService.analyse(request));

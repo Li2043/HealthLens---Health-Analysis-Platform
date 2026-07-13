@@ -56,13 +56,13 @@ and Docker Compose for local full-stack runs.
 
 | Feature | Description |
 | --- | --- |
-| **Mock / AI modes** | **AI** (default): OpenAI extraction + risk + explanation when `OPENAI_API_KEY` is set; rules safety net. **Mock**: offline rules + templates; switch shows a warning dialog |
+| **Mock / OpenAI / DeepSeek** | Header toggle selects per-request mode: **Mock** (rules + templates), **OpenAI**, or **DeepSeek**; rules safety net always applies |
 | **Structured AI pipeline** | Extraction → risk adjudication → escalation → explanation → safety validation |
 | **Emergency override** | Red-flag symptoms (chest pain, stroke signs, etc.) elevate triage even when vitals risk is low |
 | **Health-focused explanations** | Risk-tier guidance: reassurance/self-care (low), causes + steps (moderate), emergency numbers + first aid (high/emergency) |
 | **JWT authentication** | Register, login, protected analysis endpoints |
 | **Analysis history** | Persist, browse, and **clear all** past consultations per user |
-| **Bilingual UI** | Header **English / 中文** and **AI / Mock** pill toggles; API `language` syncs with UI |
+| **Bilingual UI** | Header **English / 中文** and **Mock / OpenAI / DeepSeek** pill toggles; API `language` syncs with UI |
 | **Bilingual extraction** | English and Chinese heart rate / blood pressure patterns (e.g. `heart rate 200` and `心率200`) |
 | **Docker Compose** | One command to run frontend, backend, AI service, and Postgres; frontend source volume for dev |
 
@@ -91,22 +91,53 @@ validated clinical protocols.
 
 ---
 
-## Mock vs AI mode
+## Analysis modes (Mock / OpenAI / DeepSeek)
 
-| | **AI mode** (default) | **Mock mode** |
-| --- | --- | --- |
-| **Purpose** | Real analysis with OpenAI when configured | Offline demo, CI, testing |
-| **Extraction** | OpenAI → structured fields; regex fallback | Regex / preset samples |
-| **Risk** | AI adjudicates → rules safety net (only elevates) | Rules only |
-| **Explanation** | GPT health summary + template action steps | Template “What this may mean” text |
-| **Provider badge** | `openai` or `mock-ai` (no key) | `mock` |
-| **Switching** | AI → Mock shows a **confirmation dialog** (inaccurate, testing only) |
+| | **Mock** | **OpenAI** | **DeepSeek** |
+| --- | --- | --- | --- |
+| **Purpose** | Offline demo, CI, zero API cost | Local dev or OpenAI-backed deployments | Hong Kong production deployment |
+| **Extraction** | Regex / preset samples | OpenAI → structured fields | DeepSeek → structured fields; regex fallback on failure |
+| **Risk** | Rules only | AI adjudicates → rules safety net | DeepSeek adjudicates → rules safety net |
+| **Explanation** | Template text | OpenAI GPT summary + action steps | DeepSeek Chat Completions + action steps |
+| **Provider badge** | `mock` | `openai` or `mock-ai` (no key) | `deepseek` |
+| **Switching** | Paid mode → Mock shows a **confirmation dialog** | | |
+
+### LLM provider selection (ai-service)
+
+Set in `healthlens-platform/.env` (never commit). The UI sends `mode` per request; server env selects the backend LLM implementation for evaluation and defaults.
+
+| `LLM_PROVIDER` | Use case |
+| --- | --- |
+| `mock` | Automated tests and zero-cost demos |
+| `openai` | Local development or OpenAI-backed deployments |
+| `deepseek` | Hong Kong production (`DEEPSEEK_API_KEY` required) |
+
+```env
+LLM_PROVIDER=mock
+OPENAI_API_KEY=
+DEEPSEEK_API_KEY=
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+DEEPSEEK_TIMEOUT_SECONDS=60
+```
+
+API keys must live only in local or server `.env` files — never in Git, logs, or client code.
 
 Configure OpenAI (Docker):
 
 ```powershell
 # In healthlens-platform/.env (never .env.example)
 OPENAI_API_KEY=sk-...
+
+docker compose up -d --build ai-service
+```
+
+Configure DeepSeek (Docker):
+
+```powershell
+# In healthlens-platform/.env (never .env.example)
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your-key-here
 
 docker compose up -d --build ai-service
 ```
@@ -122,7 +153,7 @@ docker compose up -d --build ai-service
 ## Healthcare Consultation Workflow
 
 ```text
-User input (React) — mode: mock | ai (default ai)
+User input (React) — mode: mock | openai | deepseek
    ↓
 Spring Boot  POST /api/analysis  (JWT + persist)
    ↓
@@ -232,6 +263,8 @@ mounts `./frontend` into the container for live updates.
 
 1. **Register** or **Login** at `/register` or `/login`
 
+   A **demo account** is created automatically on backend startup (default: `demo@healthlens.demo` / `demo1234`, **20 analyses/day**). The login page shows credentials and a one-click fill button. Regular accounts use the default limit (`ANALYSIS_DAILY_LIMIT`, usually 10).
+
 ![Login page (English)](./docs/images/02-login-en.png)
 
 ![Register page (中文)](./docs/images/03-register-zh.png)
@@ -324,13 +357,18 @@ Copy `.env.example` to `.env`. Key variables:
 | `VITE_API_BASE_URL` | Frontend → backend (`/api` in Docker; Vite proxies to backend) |
 | `JWT_SECRET` | Token signing (**required** in production) |
 | `JWT_EXPIRATION_MS` | Token lifetime (default 24h) |
-| `OPENAI_API_KEY` | **AI mode** — set in `.env` only (never commit); injects into ai-service |
-| `LLM_PROVIDER` / `EXTRACTOR_PROVIDER` | Default `mock`; AI mode prefers OpenAI when key is set |
+| `OPENAI_API_KEY` | **OpenAI mode** — set in `.env` only (never commit) |
+| `LLM_PROVIDER` | `mock` \| `openai` \| `deepseek` — ai-service LLM backend |
+| `DEEPSEEK_API_KEY` | **DeepSeek mode** — required when `LLM_PROVIDER=deepseek` |
+| `DEEPSEEK_BASE_URL` | Default `https://api.deepseek.com` |
+| `DEEPSEEK_MODEL` | Default `deepseek-v4-flash` |
+| `DEEPSEEK_TIMEOUT_SECONDS` | Default `60` |
+| `EXTRACTOR_PROVIDER` | Default `mock`; OpenAI/DeepSeek modes prefer OpenAI extraction when key is set |
 | `ENABLE_LEGACY_FRONTEND` | Expose old static UI at `/legacy` on AI service |
 
-**OpenAI setup:** copy `.env.example` → `.env`, paste key, then
-`docker compose up -d --build ai-service`. Without a key, AI mode runs as **`mock-ai`**
-(simulated AI risk + template explanation).
+**Provider setup:** copy `.env.example` → `.env`, set keys, then
+`docker compose up -d --build ai-service`. Without OpenAI key, OpenAI mode runs as **`mock-ai`**
+(simulated AI risk + template explanation). DeepSeek mode requires `DEEPSEEK_API_KEY`.
 
 Never commit real secrets. Production JWT setup:
 [`docs/deployment.md`](./docs/deployment.md).

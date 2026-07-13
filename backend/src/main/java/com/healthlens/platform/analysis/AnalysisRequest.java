@@ -10,7 +10,7 @@ public record AnalysisRequest(
         @Pattern(regexp = "en|zh", message = "language must be en or zh")
         String language,
 
-        @Pattern(regexp = "mock|ai", message = "mode must be mock or ai")
+        @Pattern(regexp = "mock|ai|openai|deepseek", message = "mode must be mock, ai, openai, or deepseek")
         String mode
 ) {
     public AnalysisRequest {

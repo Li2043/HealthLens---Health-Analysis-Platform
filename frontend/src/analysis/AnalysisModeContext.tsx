@@ -13,17 +13,19 @@ const STORAGE_KEY = "healthlens_analysis_mode";
 type AnalysisModeContextValue = {
   mode: AnalysisMode;
   setMode: (mode: AnalysisMode) => void;
-  toggleMode: () => void;
 };
 
 const AnalysisModeContext = createContext<AnalysisModeContextValue | null>(null);
 
 function readStoredMode(): AnalysisMode {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "mock") {
-    return "mock";
+  if (stored === "mock" || stored === "openai" || stored === "deepseek") {
+    return stored;
   }
-  return "ai";
+  if (stored === "ai") {
+    return "openai";
+  }
+  return "openai";
 }
 
 export function AnalysisModeProvider({ children }: { children: ReactNode }) {
@@ -34,17 +36,12 @@ export function AnalysisModeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, next);
   }, []);
 
-  const toggleMode = useCallback(() => {
-    setMode(mode === "mock" ? "ai" : "mock");
-  }, [mode, setMode]);
-
   const value = useMemo(
     () => ({
       mode,
       setMode,
-      toggleMode,
     }),
-    [mode, setMode, toggleMode],
+    [mode, setMode],
   );
 
   return (
@@ -58,4 +55,8 @@ export function useAnalysisMode(): AnalysisModeContextValue {
     throw new Error("useAnalysisMode must be used within AnalysisModeProvider");
   }
   return context;
+}
+
+export function isPaidAnalysisMode(mode: string): boolean {
+  return mode === "openai" || mode === "deepseek" || mode === "ai";
 }

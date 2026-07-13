@@ -109,7 +109,7 @@ def test_analyse_provider_configuration_error(monkeypatch):
 
 def test_analyse_production_misconfiguration_returns_provider_error(monkeypatch):
     monkeypatch.setattr("app.main.APP_ENV", "production")
-    monkeypatch.setattr("app.main.is_openai_provider_misconfigured", lambda: True)
+    monkeypatch.setattr("app.main.is_provider_misconfigured", lambda: True)
 
     response = client.post("/analyse", json={"text": SAMPLE_TEXT})
     assert response.status_code == 503
