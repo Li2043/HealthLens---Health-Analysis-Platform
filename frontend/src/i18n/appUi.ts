@@ -67,6 +67,8 @@ export type AppUiCopy = {
     failed: string;
     demoNotice: string;
     demoFill: string;
+    networkError: string;
+    serverUnavailable: string;
   };
   register: {
     title: string;
@@ -78,6 +80,8 @@ export type AppUiCopy = {
     hasAccount: string;
     loginLink: string;
     failed: string;
+    networkError: string;
+    serverUnavailable: string;
   };
   analysis: AnalysisUiCopy;
   history: {
@@ -124,6 +128,9 @@ const EN: AppUiCopy = {
     demoNotice:
       "Demo account ({limit} analyses/day): {email} / {password}",
     demoFill: "Use demo account",
+    networkError:
+      "Cannot reach the API server. Open http://localhost:5173 and ensure Docker backend is running.",
+    serverUnavailable: "Request timed out. The server may be starting — try again shortly.",
   },
   register: {
     title: "Register",
@@ -135,6 +142,9 @@ const EN: AppUiCopy = {
     hasAccount: "Already have an account?",
     loginLink: "Login",
     failed: "Registration failed. Please try again.",
+    networkError:
+      "Cannot reach the API server. Open http://localhost:5173 and ensure Docker backend is running.",
+    serverUnavailable: "Request timed out. The server may be starting — try again shortly.",
   },
   analysis: {
     pageTitle: "Health Analysis",
@@ -233,6 +243,8 @@ const ZH: AppUiCopy = {
     failed: "登录失败，请检查邮箱和密码。",
     demoNotice: "演示账号（每日 {limit} 次）：{email} / {password}",
     demoFill: "填入演示账号",
+    networkError: "无法连接 API 服务器。请通过 http://localhost:5173 访问，并确认 Docker 后端已启动。",
+    serverUnavailable: "请求超时，服务器可能仍在启动，请稍后重试。",
   },
   register: {
     title: "注册",
@@ -244,6 +256,8 @@ const ZH: AppUiCopy = {
     hasAccount: "已有账号？",
     loginLink: "去登录",
     failed: "注册失败，请重试。",
+    networkError: "无法连接 API 服务器。请通过 http://localhost:5173 访问，并确认 Docker 后端已启动。",
+    serverUnavailable: "请求超时，服务器可能仍在启动，请稍后重试。",
   },
   analysis: {
     pageTitle: "健康分析",

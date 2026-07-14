@@ -1,18 +1,8 @@
-import { isAxiosError } from "axios";
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { getAuthErrorMessage } from "../api/authErrors";
 import { useAuth } from "../auth/AuthContext";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (isAxiosError(error)) {
-    const message = error.response?.data?.message;
-    if (typeof message === "string" && message.length > 0) {
-      return message;
-    }
-  }
-  return fallback;
-}
 
 export function RegisterPage() {
   const { register, isAuthenticated } = useAuth();
@@ -37,7 +27,7 @@ export function RegisterPage() {
       await register(email.trim(), password);
       navigate("/analyse", { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, ui.register.failed));
+      setError(getAuthErrorMessage(err, ui.register));
     } finally {
       setLoading(false);
     }

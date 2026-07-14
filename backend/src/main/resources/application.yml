@@ -39,3 +39,5 @@ healthlens:
     email: ${DEMO_ACCOUNT_EMAIL:demo@healthlens.demo}
     password: ${DEMO_ACCOUNT_PASSWORD:demo1234}
     daily-limit: ${DEMO_ANALYSIS_DAILY_LIMIT:20}
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,http://192.168.*:*,http://10.*:*,http://172.*:*}

@@ -1,19 +1,9 @@
-import { isAxiosError } from "axios";
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { getAuthErrorMessage } from "../api/authErrors";
 import { useAuth } from "../auth/AuthContext";
 import { demoAccountConfig } from "../config/demoAccount";
 import { useUiLanguage } from "../i18n/UiLanguageContext";
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (isAxiosError(error)) {
-    const message = error.response?.data?.message;
-    if (typeof message === "string" && message.length > 0) {
-      return message;
-    }
-  }
-  return fallback;
-}
 
 function formatDemoNotice(template: string): string {
   return template
@@ -47,7 +37,7 @@ export function LoginPage() {
       await login(email.trim(), password);
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, ui.login.failed));
+      setError(getAuthErrorMessage(err, ui.login));
     } finally {
       setLoading(false);
     }
